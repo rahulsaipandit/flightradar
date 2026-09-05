@@ -51,3 +51,10 @@ fun projectOrNull(center: GeoPoint, aircraft: Aircraft, maxRangeKm: Double): Rad
 
     return RadarTarget(aircraft, distanceKm, bearingRad)
 }
+
+/** Inverse of the projection above — moves [center] by a km offset (east/north), for pan. */
+fun offsetGeoPoint(center: GeoPoint, eastwardKm: Double, northwardKm: Double): GeoPoint {
+    val newLat = center.latitude + northwardKm / KM_PER_DEGREE
+    val newLon = center.longitude + eastwardKm / (KM_PER_DEGREE * cos(center.latitude * PI / 180.0))
+    return GeoPoint(newLat, newLon)
+}
