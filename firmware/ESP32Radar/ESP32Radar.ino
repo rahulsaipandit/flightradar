@@ -7,10 +7,14 @@
 #include <TFT_eSPI.h>
 #include <cmath>
 #include <Preferences.h>
+#include "board_config.h"
+#if FORCE_INSECURE_TLS
+  #include <WiFiClientSecure.h>
+#endif
 
 // --- Settings & Security ---
-const int SETTINGS_BUTTON_PIN = 0; 
-const char* DEVICE_PIN = "1991"; 
+const int SETTINGS_BUTTON_PIN = 0;
+const char* DEVICE_PIN = DEFAULT_DEVICE_PIN;
 
 // --- Configurable State Parameters ---
 float radarLat, radarLon, maxRadarRangeKm;
@@ -63,25 +67,26 @@ void renderRadarFrame();
 void updateStatusScreen(String line1, String line2, uint16_t color) {
   tft.fillScreen(TFT_BLACK);
   tft.setTextColor(color, TFT_BLACK);
-  tft.drawCentreString(line1, 120, 100, 2);
-  tft.drawCentreString(line2, 120, 130, 2);
+  tft.drawCentreString(line1, GRID_CENTER_X, GRID_CENTER_Y - 20, 2);
+  tft.drawCentreString(line2, GRID_CENTER_X, GRID_CENTER_Y + 10, 2);
 }
 
 void setup() {
   Serial.begin(115200);
   pinMode(SETTINGS_BUTTON_PIN, INPUT_PULLUP);
-  pinMode(21, OUTPUT); digitalWrite(21, HIGH); // Backlight
-  
-  delay(1000); 
-  
+  pinMode(BACKLIGHT_PIN, OUTPUT); digitalWrite(BACKLIGHT_PIN, HIGH); // Backlight
+
+  delay(1000);
+
   tft.init(); tft.setRotation(0); tft.fillScreen(TFT_BLACK);
 
   // Initialize 8-bit Sprite (uses less RAM to protect WiFi/JSON stability)
-  spr.setColorDepth(8); 
+  // The radar sprite itself is a fixed 240x240 square regardless of board/screen size.
+  spr.setColorDepth(8);
   spr.createSprite(240, 240);
-  
+
   tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  tft.drawCentreString("SYSTEM BOOT...", 120, 110, 2);
+  tft.drawCentreString("SYSTEM BOOT...", GRID_CENTER_X, GRID_CENTER_Y - 10, 2);
 
   loadConfiguration();
 
@@ -130,7 +135,7 @@ void setup() {
     updateStatusScreen("WIFI FAILED", "Scanning Rooms...", TFT_GREEN);
     runNetworkScan();
     WiFi.mode(WIFI_AP);
-    WiFi.softAP("DeskRadar-Setup-byGeGeLV");
+    WiFi.softAP(SOFTAP_SSID);
     
     server.on("/", [](){
       String defaultOption = (storedSsid.length() > 0) ? "<option value=''>-- Keep Saved (" + storedSsid + ") --</option>" : "<option value=''>-- Select Network --</option>";
@@ -139,7 +144,7 @@ void setup() {
       
       String html = "<html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'>"
                     "<style>body{background:#000;color:#0f0;font-family:sans-serif;padding:20px;} input, select, button {margin-top:5px; padding:8px;} hr{border-color:#0f0;}</style></head><body>"
-                    "<h2>DeskRadar Setup by GeGeLv</h2><form action='/save' method='POST'>"
+                    "<h2>" PORTAL_TITLE "</h2><form action='/save' method='POST'>"
                     "<label>Device PIN (on the housing):</label><br><input type='password' name='pin' style='width:100%;' required><hr>"
                     
                     "<label>Select WiFi Network:</label><br>"
@@ -254,8 +259,8 @@ void loop() {
   if (lastFetchTime == 0 || millis() - lastFetchTime >= pollInterval) {
     
     if (apiType == "auth" && (accessToken == "" || millis() >= tokenExpiryTime)) {
-      tft.fillRect(20, 110, 200, 20, TFT_BLACK);
-      tft.drawCentreString("Authenticating...", 120, 112, 1);
+      tft.fillRect(GRID_CENTER_X - 100, GRID_CENTER_Y - 10, 200, 20, TFT_BLACK);
+      tft.drawCentreString("Authenticating...", GRID_CENTER_X, GRID_CENTER_Y - 8, 1);
       if (!refreshOpenSkyToken()) {
         lastFetchTime = millis() - pollInterval + 10000; 
         return; 
@@ -392,7 +397,15 @@ void drawRadarGrid() {
 
 void fetchAndMapFlights() {
   HTTPClient http;
-  http.begin("https://opensky-network.org/api/states/all?lamin=" + lamin + "&lomin=" + lomin + "&lamax=" + lamax + "&lomax=" + lomax);
+  String url = "https://opensky-network.org/api/states/all?lamin=" + lamin + "&lomin=" + lomin + "&lamax=" + lamax + "&lomax=" + lomax;
+#if FORCE_INSECURE_TLS
+  WiFiClientSecure client;
+  client.setInsecure(); // Bypasses cert validation to avoid API ERR: 308 on this board
+  http.begin(client, url);
+  http.addHeader("User-Agent", "Mozilla/5.0");
+#else
+  http.begin(url);
+#endif
   if (apiType == "auth") http.addHeader("Authorization", "Bearer " + accessToken);
   
   int httpCode = http.GET();

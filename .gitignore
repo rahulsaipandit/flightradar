@@ -1,0 +1,15 @@
+# Gradle / KMP
+.gradle/
+kmp/**/build/
+kmp/local.properties
+kmp/.idea/
+kmp/*.iml
+
+# Xcode
+**/*.xcodeproj/xcuserdata/
+**/*.xcworkspace/xcuserdata/
+DerivedData/
+
+# OS
+.DS_Store
+Thumbs.db
