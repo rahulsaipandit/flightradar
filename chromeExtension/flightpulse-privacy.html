@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>FlightPulse Privacy Policy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; }
+  img { max-width: 100%; }
+  :root {
+    --paper: #f6f7f3;
+    --surface: #ffffff;
+    --ink: #1b211a;
+    --muted: #5b6656;
+    --line: #dee3d7;
+    --accent: #1e7a38;
+    --accent-ink: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #12160f;
+      --surface: #181d14;
+      --ink: #e7eedf;
+      --muted: #93a08a;
+      --line: #2a3222;
+      --accent: #4ccb6b;
+      --accent-ink: #0d1409;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #12160f;
+    --surface: #181d14;
+    --ink: #e7eedf;
+    --muted: #93a08a;
+    --line: #2a3222;
+    --accent: #4ccb6b;
+    --accent-ink: #0d1409;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Public Sans', system-ui, sans-serif;
+    line-height: 1.6;
+    font-size: 16px;
+  }
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+  }
+
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+  header.top {
+    margin-bottom: 40px;
+  }
+  .eyebrow {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+  h1 {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-weight: 700;
+    font-size: clamp(28px, 5vw, 38px);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: 0 0 12px;
+    text-wrap: balance;
+  }
+  .dek {
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 60ch;
+    margin: 0 0 18px;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .meta-row b { color: var(--ink); font-weight: 500; }
+
+  .tldr {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 18px 22px;
+    margin: 32px 0 48px;
+  }
+  .tldr .eyebrow { margin-bottom: 10px; }
+  .tldr p { margin: 0 0 10px; }
+  .tldr p:last-child { margin-bottom: 0; }
+  .tldr ul { margin: 0; padding-left: 20px; }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li:last-child { margin-bottom: 0; }
+
+  section.entry {
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    gap: 4px 24px;
+    padding: 30px 0;
+    border-top: 1px solid var(--line);
+  }
+  section.entry:last-of-type {
+    border-bottom: 1px solid var(--line);
+  }
+  .bearing {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--accent);
+  }
+  .bearing .deg {
+    font-size: 20px;
+    font-weight: 700;
+    display: block;
+    line-height: 1.1;
+  }
+  .bearing .dir {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+  }
+  .entry h2 {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  .entry p { margin: 0 0 10px; max-width: 62ch; }
+  .entry p:last-child { margin-bottom: 0; }
+  .entry ul { margin: 10px 0; padding-left: 20px; max-width: 62ch; }
+  .entry li { margin-bottom: 6px; }
+  code {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.88em;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  a { color: var(--accent); }
+
+  @media (max-width: 560px) {
+    section.entry {
+      grid-template-columns: 1fr;
+    }
+    .bearing {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .bearing .dir { margin-top: 0; }
+  }
+
+  footer.closing {
+    margin-top: 48px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 14px;
+  }
+  footer.closing a { font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="top">
+    <p class="eyebrow">Privacy Policy</p>
+    <h1>FlightPulse Chrome Extension</h1>
+    <p class="dek">FlightPulse shows nearby aircraft on a live radar display, using position data from the OpenSky Network. This page explains exactly what data the extension touches, where it goes, and where it doesn't.</p>
+    <div class="meta-row">
+      <span><b>Effective</b> 2026-09-06</span>
+      <span><b>Applies to</b> the FlightPulse Chrome extension (all versions)</span>
+      <span><b>Contact</b> <a href="mailto:extension@guideaxon.com">extension@guideaxon.com</a></span>
+    </div>
+  </header>
+
+  <div class="tldr">
+    <p class="eyebrow" style="margin-bottom:10px;">Plain-language summary</p>
+    <ul>
+      <li>Your location is used only to ask OpenSky "what's flying near here" — it's never stored by us, never sent anywhere but OpenSky, and never leaves your device otherwise.</li>
+      <li>There is no FlightPulse server. Every request goes straight from your browser to OpenSky Network or adsbdb.com.</li>
+      <li>No accounts, no ads, no analytics, no trackers, nothing sold to anyone.</li>
+      <li>If you add your own OpenSky credentials, they stay on your machine in the browser's local extension storage.</li>
+    </ul>
+  </div>
+
+  <section class="entry">
+    <div class="bearing"><span class="deg">000°</span><span class="dir">N</span></div>
+    <div>
+      <h2>What FlightPulse does</h2>
+      <p>FlightPulse is a Chrome extension that draws a radar-style display of aircraft near a location you provide, using live position data from the <a href="https://opensky-network.org" target="_blank" rel="noopener">OpenSky Network</a>. It has no companion server or backend — the extension talks directly to OpenSky's and adsbdb.com's public APIs from your browser.</p>
+    </div>
+  </section>
+
+  <section class="entry">
+    <div class="bearing"><span class="deg">045°</span><span class="dir">NE</span></div>
+    <div>
+      <h2>Location data</h2>
+      <p>When you open the radar view, your browser's native location prompt asks for permission, the same way any website's would. If you allow it:</p>
+      <ul>
+        <li>Your coordinates are used locally to build a bounding-box query, which is sent to OpenSky to ask which aircraft are nearby.</li>
+        <li>Your coordinates are never stored, logged, or sent to any destination other than OpenSky's <code>states/all</code> endpoint.</li>
+        <li>Location updates stop the moment the radar tab is closed — nothing runs or tracks you in the background.</li>
+      </ul>
+      <p>If you deny the prompt, the radar simply can't show anything — there's no fallback tracking method.</p>
+    </div>
+  </section>
+
+  <section class="entry">
+    <div class="bearing"><span class="deg">090°</span><span class="dir">E</span></div>
+    <div>
+      <h2>Aircraft data from OpenSky</h2>
+      <p>FlightPulse fetches publicly broadcast aircraft positions (callsign, altitude, speed, heading) within roughly 200km of the location above, on OpenSky's free anonymous tier by default. This is public flight-tracking data about aircraft, not about you, and OpenSky's own terms govern how that data may be used.</p>
+    </div>
+  </section>
+
+  <section class="entry">
+    <div class="bearing"><span class="deg">135°</span><span class="dir">SE</span></div>
+    <div>
+      <h2>Optional OpenSky account credentials</h2>
+      <p>You can optionally enter your own OpenSky client ID and secret in Settings for a higher rate limit. If you do:</p>
+      <ul>
+        <li>They're stored only in <code>chrome.storage.local</code> — local to your browser profile, on your own device.</li>
+        <li>They're sent only to OpenSky's own authentication server, to obtain an access token — never to us, never anywhere else.</li>
+        <li>We have no visibility into these credentials at any point; there's nowhere for them to go but your device and OpenSky.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="entry">
+    <div class="bearing"><span class="deg">180°</span><span class="dir">S</span></div>
+    <div>
+      <h2>Registration/model lookups</h2>
+      <p>Tapping an aircraft on the radar looks up its registration and model via <a href="https://api.adsbdb.com" target="_blank" rel="noopener">adsbdb.com</a>, a free public aviation database. Only the aircraft's ICAO24 identifier is sent — no location or personal data accompanies that request. Results are cached in memory for the current session so the same aircraft isn't looked up twice.</p>
+    </div>
+  </section>
+
+  <section class="entry">
+    <div class="bearing"><span class="deg">225°</span><span class="dir">SW</span></div>
+    <div>
+      <h2>What we don't do</h2>
+      <ul>
+        <li>No user accounts, sign-in, or profiles.</li>
+        <li>No analytics, telemetry, or crash reporting.</li>
+        <li>No advertising or ad networks.</li>
+        <li>No cookies.</li>
+        <li>No selling, renting, or sharing data with third parties beyond the two APIs named on this page, which receive only what's described above.</li>
+      </ul>
+      <p>Questions about this policy or how FlightPulse handles data can be sent to <a href="mailto:extension@guideaxon.com">extension@guideaxon.com</a>.</p>
+    </div>
+  </section>
+
+  <footer class="closing">
+    <p>This policy may be updated as FlightPulse changes. Material changes to what data is collected or how it's used will be reflected here with an updated effective date.</p>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -39,6 +39,29 @@ export async function mountSettingsForm(root) {
         </div>
       </fieldset>
 
+      <fieldset>
+        <legend>Flight status lookup</legend>
+        <label>
+          AeroDataBox (RapidAPI) key
+          <input type="password" id="aeroDataBoxApiKey" autocomplete="off" />
+        </label>
+        <p class="hint">
+          Powers the "Find Flight" search in the radar screen's menu (flight number → schedule,
+          status, departure/arrival times). Get a key at
+          <a
+            href="https://rapidapi.com/aedbx-aedbx/api/aerodatabox"
+            target="_blank"
+            rel="noopener"
+            >rapidapi.com/aedbx-aedbx/api/aerodatabox</a
+          >, then on that page's <strong>Pricing</strong> tab click <strong>Subscribe</strong> —
+          having a RapidAPI account/key alone isn't enough, each API needs its own subscription
+          or every call 403s with "not subscribed". Flight status is a paid Tier 2 endpoint, so
+          the free Basic plan alone won't unlock it either. This only calls out when you search
+          (no background polling), so a low-volume paid plan comfortably covers normal use.
+          Stored only in this browser's local extension storage.
+        </p>
+      </fieldset>
+
       <button type="submit">Save</button>
       <span id="save-status" class="save-status" role="status"></span>
     </form>
@@ -48,6 +71,7 @@ export async function mountSettingsForm(root) {
   const credentialFields = root.querySelector('#credential-fields');
   const clientIdInput = root.querySelector('#clientId');
   const clientSecretInput = root.querySelector('#clientSecret');
+  const aeroDataBoxApiKeyInput = root.querySelector('#aeroDataBoxApiKey');
   const saveStatus = root.querySelector('#save-status');
 
   function updateCredentialFieldsVisibility(mode) {
@@ -60,6 +84,7 @@ export async function mountSettingsForm(root) {
   form.querySelector(`input[name="authMode"][value="${settings.openskyAuthMode}"]`).checked = true;
   clientIdInput.value = settings.openskyClientId;
   clientSecretInput.value = settings.openskyClientSecret;
+  aeroDataBoxApiKeyInput.value = settings.aeroDataBoxApiKey;
   updateCredentialFieldsVisibility(settings.openskyAuthMode);
 
   form.querySelectorAll('input[name="authMode"]').forEach((radio) => {
@@ -73,6 +98,7 @@ export async function mountSettingsForm(root) {
       openskyAuthMode: authMode,
       openskyClientId: clientIdInput.value.trim(),
       openskyClientSecret: clientSecretInput.value,
+      aeroDataBoxApiKey: aeroDataBoxApiKeyInput.value.trim(),
     });
     saveStatus.textContent = 'Saved';
     setTimeout(() => {

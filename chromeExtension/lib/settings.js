@@ -11,6 +11,7 @@ export const DEFAULT_SETTINGS = {
   openskyAuthMode: 'anonymous', // 'anonymous' | 'authenticated'
   openskyClientId: '',
   openskyClientSecret: '',
+  aeroDataBoxApiKey: '', // RapidAPI key for AeroDataBox, powers the "Find Flight" status lookup
 };
 
 const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS);

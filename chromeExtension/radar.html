@@ -25,6 +25,50 @@
 
       <div id="detail-overlay" class="detail-overlay" hidden></div>
 
+      <div id="flight-status-overlay" class="detail-overlay" hidden>
+        <div class="detail-box flight-status-box">
+          <div class="flight-status-title">FIND FLIGHT</div>
+          <form id="flight-status-form" class="flight-status-form">
+            <input
+              id="flight-status-input"
+              class="flight-status-input"
+              type="text"
+              placeholder="e.g. AS1234"
+              value="AS1234"
+              autocomplete="off"
+              autocapitalize="characters"
+            />
+            <button type="submit" class="detail-button">SEARCH</button>
+          </form>
+          <div id="flight-status-result" class="flight-status-result"></div>
+          <div class="detail-buttons">
+            <button type="button" class="detail-button" id="flight-status-close-btn">CLOSE</button>
+          </div>
+          <button type="button" id="flight-status-help-toggle" class="flight-status-help-toggle">
+            ⓘ Need an API key?
+          </button>
+          <div id="flight-status-help" class="flight-status-help" hidden>
+            Flight status is powered by
+            <a href="https://rapidapi.com/aedbx-aedbx/api/aerodatabox" target="_blank" rel="noopener"
+              >AeroDataBox on RapidAPI</a
+            >. To get one working:
+            <ol>
+              <li>Sign in to RapidAPI and open the AeroDataBox page above.</li>
+              <li>
+                Open its <strong>Pricing</strong> tab and click <strong>Subscribe</strong> on a
+                plan — having a RapidAPI account/key alone isn't enough, each API needs its own
+                subscription or every call fails with "not subscribed".
+              </li>
+              <li>
+                Flight status is a paid <strong>Tier 2</strong> endpoint, so the free Basic plan
+                alone won't unlock it — pick a paid plan.
+              </li>
+              <li>Copy your key from the page's Endpoints tab, then paste it into ⚙ Settings here.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
       <button id="settings-corner" class="settings-corner" title="OpenSky account settings">⚙</button>
     </div>
     <script type="module" src="radar.js"></script>

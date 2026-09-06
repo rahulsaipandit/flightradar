@@ -43,6 +43,15 @@ apart, same risk called out below for the ESP32/KMP split in `docs/design.md`.
 - **Polling cadence**: fixed 108s guest-mode interval (`POLL_INTERVAL_GUEST_MS`), same as
   `RadarRepository.kt` — not user-configurable, because it isn't on the watch either.
 
+## Find Flight (extension-only, no watch equivalent)
+
+The hamburger menu's "Find Flight" row opens a modal to look up a flight number's schedule/status
+(departure/arrival airports, scheduled/actual/estimated times) — unlike the radar itself, this
+isn't a port of anything in `kmp/wearApp`, since OpenSky's live ADS-B feed has no concept of a
+flight number's schedule. It calls AeroDataBox (RapidAPI) via `lib/flightStatus.js`, using an API
+key the user supplies in Settings (same "empty by default, opt-in via settings" pattern as the
+OpenSky credentials below).
+
 ## Structure
 
 - `manifest.json` — Manifest V3, side panel + options page, no popup.
@@ -72,11 +81,13 @@ apart, same risk called out below for the ESP32/KMP split in `docs/design.md`.
   `AircraftClassification.kt`/`MilitaryAllocation.kt`.
 - `lib/aircraftMetadata.js` — adsbdb.com registration/model lookup, ported
   from `AircraftMetadataProvider.kt`.
+- `lib/flightStatus.js` — AeroDataBox (RapidAPI) client for the "Find Flight"
+  modal; flight-number lookup only, unrelated to the OpenSky radar feed.
 - `lib/settings.js` / `lib/settingsForm.js` — `chrome.storage.local`-backed
-  OpenSky credentials and the shared form UI used by both the side panel and
-  options page. Deliberately does NOT hold zoom/pan/filter/units/pin state —
-  that lives in `radar.js`'s in-memory state only, same as `RadarViewModel`
-  not persisting across process death.
+  OpenSky credentials + AeroDataBox API key, and the shared form UI used by
+  both the side panel and options page. Deliberately does NOT hold
+  zoom/pan/filter/units/pin state — that lives in `radar.js`'s in-memory state
+  only, same as `RadarViewModel` not persisting across process death.
 - `aircraft-icons/` — the exact PNG silhouettes from `kmp/wearApp`'s
   `res/drawable-nodpi/`, copied as-is.
 

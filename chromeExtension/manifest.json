@@ -7,7 +7,8 @@
   "host_permissions": [
     "https://opensky-network.org/*",
     "https://auth.opensky-network.org/*",
-    "https://api.adsbdb.com/*"
+    "https://api.adsbdb.com/*",
+    "https://aerodatabox.p.rapidapi.com/*"
   ],
   "background": {
     "service_worker": "background.js",

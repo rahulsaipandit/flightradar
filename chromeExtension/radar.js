@@ -4,6 +4,7 @@
 
 import { getSettings } from './lib/settings.js';
 import { fetchNearbyAircraft, FETCH_RADIUS_KM } from './lib/opensky.js';
+import { fetchFlightStatus } from './lib/flightStatus.js';
 import {
   boundingBox,
   distanceAndBearing,
@@ -102,6 +103,13 @@ const zoomLabel = document.getElementById('zoom-label');
 const centerReset = document.getElementById('center-reset');
 const detailOverlay = document.getElementById('detail-overlay');
 const settingsCornerBtn = document.getElementById('settings-corner');
+const flightStatusOverlay = document.getElementById('flight-status-overlay');
+const flightStatusForm = document.getElementById('flight-status-form');
+const flightStatusInput = document.getElementById('flight-status-input');
+const flightStatusResult = document.getElementById('flight-status-result');
+const flightStatusCloseBtn = document.getElementById('flight-status-close-btn');
+const flightStatusHelpToggle = document.getElementById('flight-status-help-toggle');
+const flightStatusHelp = document.getElementById('flight-status-help');
 
 settingsCornerBtn.addEventListener('click', () => chrome.runtime.openOptionsPage());
 
@@ -224,6 +232,12 @@ function renderFilterMenu() {
   unitsRow.textContent = `Units: ${state.useMiles ? 'mi' : 'km'}`;
   unitsRow.addEventListener('click', toggleUnits);
   filterMenu.appendChild(unitsRow);
+
+  const findFlightRow = document.createElement('div');
+  findFlightRow.className = 'filter-row';
+  findFlightRow.textContent = 'Find Flight';
+  findFlightRow.addEventListener('click', openFlightStatusModal);
+  filterMenu.appendChild(findFlightRow);
 }
 renderFilterMenu();
 
@@ -278,6 +292,61 @@ function renderDetailOverlay() {
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
+
+// ---- Find-flight modal ----
+function openFlightStatusModal() {
+  filterMenu.hidden = true;
+  flightStatusResult.innerHTML = '';
+  flightStatusHelp.hidden = true;
+  flightStatusOverlay.hidden = false;
+  flightStatusInput.focus();
+  flightStatusInput.select();
+}
+function closeFlightStatusModal() {
+  flightStatusOverlay.hidden = true;
+}
+function renderFlightStatusMessage(text, isError) {
+  flightStatusResult.innerHTML = `<div class="${isError ? 'fs-error' : 'fs-message'}">${escapeHtml(text)}</div>`;
+}
+function formatFlightTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+function renderFlightStatusResult(flight) {
+  flightStatusResult.innerHTML = `
+    <div class="fs-callsign">${escapeHtml(flight.number)}</div>
+    <div class="fs-status">${escapeHtml(flight.airline ? `${flight.airline} · ` : '')}${escapeHtml(flight.status)}</div>
+    <div class="fs-section-title">Departure (${escapeHtml(flight.departure.airport)})</div>
+    <div class="fs-row"><span class="fs-label">Sch:</span><span>${escapeHtml(formatFlightTime(flight.departure.scheduled))}</span></div>
+    <div class="fs-row"><span class="fs-label">Act:</span><span>${escapeHtml(formatFlightTime(flight.departure.actual))}</span></div>
+    <div class="fs-section-title">Arrival (${escapeHtml(flight.arrival.airport)})</div>
+    <div class="fs-row"><span class="fs-label">Sch:</span><span>${escapeHtml(formatFlightTime(flight.arrival.scheduled))}</span></div>
+    <div class="fs-row"><span class="fs-label">Est:</span><span>${escapeHtml(formatFlightTime(flight.arrival.estimated))}</span></div>
+  `;
+}
+flightStatusForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const code = flightStatusInput.value;
+  renderFlightStatusMessage('Looking up flight…', false);
+  try {
+    const settings = await getSettings();
+    const flight = await fetchFlightStatus(code, settings);
+    renderFlightStatusResult(flight);
+  } catch (err) {
+    renderFlightStatusMessage(err.message, true);
+  }
+});
+flightStatusCloseBtn.addEventListener('click', closeFlightStatusModal);
+flightStatusHelpToggle.addEventListener('click', () => {
+  flightStatusHelp.hidden = !flightStatusHelp.hidden;
+});
 
 function selectTarget(target) {
   state.selectedTarget = target;
