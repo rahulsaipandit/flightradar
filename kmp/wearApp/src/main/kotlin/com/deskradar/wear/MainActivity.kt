@@ -94,11 +94,17 @@ class MainActivity : FragmentActivity(), AmbientModeSupport.AmbientCallbackProvi
                         isAmbient = isAmbient,
                         activeFilters = emptySet(),
                         myLocationMarker = null,
+                        useMiles = false,
+                        pinnedIcao24 = null,
+                        metadataByIcao24 = emptyMap(),
                         onGrantPermission = { requestPermission.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
                         onZoom = {},
                         onPan = { _, _ -> },
                         onRecenter = {},
-                        onToggleFilter = {}
+                        onToggleFilter = {},
+                        onToggleUnits = {},
+                        onTogglePin = {},
+                        onRequestMetadata = {}
                     )
                 } else {
                     val targets by viewModel.targets.collectAsState()
@@ -106,6 +112,9 @@ class MainActivity : FragmentActivity(), AmbientModeSupport.AmbientCallbackProvi
                     val isPanned by viewModel.isPanned.collectAsState()
                     val activeFilters by viewModel.activeFilters.collectAsState()
                     val myLocationMarker by viewModel.myLocationMarker.collectAsState()
+                    val useMiles by viewModel.useMiles.collectAsState()
+                    val pinnedIcao24 by viewModel.pinnedIcao24.collectAsState()
+                    val metadataByIcao24 by viewModel.metadataByIcao24.collectAsState()
 
                     RadarScreen(
                         uiState = targets?.let { RadarUiState.Data(it) } ?: RadarUiState.Loading,
@@ -114,11 +123,17 @@ class MainActivity : FragmentActivity(), AmbientModeSupport.AmbientCallbackProvi
                         isAmbient = isAmbient,
                         activeFilters = activeFilters,
                         myLocationMarker = myLocationMarker,
+                        useMiles = useMiles,
+                        pinnedIcao24 = pinnedIcao24,
+                        metadataByIcao24 = metadataByIcao24,
                         onGrantPermission = {},
                         onZoom = viewModel::zoomBy,
                         onPan = viewModel::panBy,
                         onRecenter = viewModel::resetView,
-                        onToggleFilter = viewModel::toggleFilter
+                        onToggleFilter = viewModel::toggleFilter,
+                        onToggleUnits = viewModel::toggleUnits,
+                        onTogglePin = viewModel::togglePin,
+                        onRequestMetadata = viewModel::requestMetadata
                     )
                 }
             }

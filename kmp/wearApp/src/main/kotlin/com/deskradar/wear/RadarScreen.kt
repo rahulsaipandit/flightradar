@@ -23,9 +23,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -55,6 +59,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -63,6 +68,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.deskradar.common.AircraftCategory
@@ -100,6 +106,7 @@ private data class AircraftIcons(
 private val CALLSIGN_WHITE = Color(0xFFFFFFFF)
 private val INFO_BLUE = Color(0xFF4FC3F7)
 private val CLIMB_ORANGE = Color(0xFFFFA000)
+private val PIN_PURPLE = Color(0xFFCE93D8)
 
 private const val ZOOM_STEP_KM = 5.0
 private const val ROTARY_KM_PER_PIXEL = 0.08
@@ -139,11 +146,17 @@ fun RadarScreen(
     isAmbient: Boolean,
     activeFilters: Set<AircraftCategory>,
     myLocationMarker: RadarMarkerPosition?,
+    useMiles: Boolean,
+    pinnedIcao24: String?,
+    metadataByIcao24: Map<String, MetadataLookup>,
     onGrantPermission: () -> Unit,
     onZoom: (deltaKm: Double) -> Unit,
     onPan: (eastwardKm: Double, northwardKm: Double) -> Unit,
     onRecenter: () -> Unit,
-    onToggleFilter: (AircraftCategory) -> Unit
+    onToggleFilter: (AircraftCategory) -> Unit,
+    onToggleUnits: () -> Unit,
+    onTogglePin: (icao24: String) -> Unit,
+    onRequestMetadata: (icao24: String) -> Unit
 ) {
     var showFilterMenu by remember { mutableStateOf(false) }
 
@@ -163,7 +176,7 @@ fun RadarScreen(
                 )
             }
             RadarUiState.Loading -> {
-                RadarSweep(targets = emptyList(), displayRangeKm = displayRangeKm, isAmbient = isAmbient, activeFilters = activeFilters, myLocationMarker = myLocationMarker, onZoom = onZoom, onPan = onPan, onTapTarget = {})
+                RadarSweep(targets = emptyList(), displayRangeKm = displayRangeKm, isAmbient = isAmbient, activeFilters = activeFilters, myLocationMarker = myLocationMarker, pinnedIcao24 = pinnedIcao24, onZoom = onZoom, onPan = onPan, onTapTarget = {})
                 Text("GETTING LOCATION...", color = BRIGHT_GREEN, style = MaterialTheme.typography.caption2)
             }
             is RadarUiState.Data -> {
@@ -174,12 +187,25 @@ fun RadarScreen(
                     isAmbient = isAmbient,
                     activeFilters = activeFilters,
                     myLocationMarker = myLocationMarker,
+                    pinnedIcao24 = pinnedIcao24,
                     onZoom = onZoom,
                     onPan = onPan,
                     onTapTarget = { selected = it }
                 )
-                selected?.let {
-                    DetailOverlay(target = it, onDismiss = { selected = null })
+                selected?.let { detailTarget ->
+                    // Registration/model isn't in OpenSky's states feed — it needs its own lookup
+                    // (see AircraftMetadataProvider), fired once per newly-selected aircraft.
+                    LaunchedEffect(detailTarget.aircraft.icao24) {
+                        onRequestMetadata(detailTarget.aircraft.icao24)
+                    }
+                    DetailOverlay(
+                        target = detailTarget,
+                        useMiles = useMiles,
+                        isPinned = detailTarget.aircraft.icao24 == pinnedIcao24,
+                        metadataLookup = metadataByIcao24[detailTarget.aircraft.icao24],
+                        onTogglePin = { onTogglePin(detailTarget.aircraft.icao24) },
+                        onDismiss = { selected = null }
+                    )
                 }
             }
         }
@@ -189,18 +215,21 @@ fun RadarScreen(
         if (uiState !is RadarUiState.PermissionRequired && !isAmbient) {
             ZoomStepper(
                 displayRangeKm = displayRangeKm,
+                useMiles = useMiles,
                 onZoom = onZoom,
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp)
             )
             HamburgerButton(
                 onClick = { showFilterMenu = !showFilterMenu },
-                modifier = Modifier.align(Alignment.TopCenter).padding(top = 30.dp)
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 30.dp).zIndex(20f)
             )
             if (showFilterMenu) {
                 FilterMenu(
                     activeFilters = activeFilters,
+                    useMiles = useMiles,
                     onToggleFilter = onToggleFilter,
-                    modifier = Modifier.align(Alignment.TopCenter).padding(top = 62.dp)
+                    onToggleUnits = onToggleUnits,
+                    modifier = Modifier.align(Alignment.TopCenter).padding(top = 62.dp).zIndex(20f)
                 )
             }
             CenterResetIcon(
@@ -238,7 +267,9 @@ private fun HamburgerButton(onClick: () -> Unit, modifier: Modifier = Modifier) 
 @Composable
 private fun FilterMenu(
     activeFilters: Set<AircraftCategory>,
+    useMiles: Boolean,
     onToggleFilter: (AircraftCategory) -> Unit,
+    onToggleUnits: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val options = listOf(
@@ -255,40 +286,133 @@ private fun FilterMenu(
             val active = category in activeFilters
             Text(
                 (if (active) "✓ " else "  ") + label,
-                color = if (active) CLIMB_ORANGE else GRID_GREEN,
+                color = CLIMB_ORANGE,
                 style = MaterialTheme.typography.caption2,
                 modifier = Modifier.clickable { onToggleFilter(category) }.padding(2.dp)
             )
         }
+        Text(
+            "Units: ${if (useMiles) "mi" else "km"}",
+            color = CLIMB_ORANGE,
+            style = MaterialTheme.typography.caption2,
+            modifier = Modifier.clickable(onClick = onToggleUnits).padding(2.dp)
+        )
+    }
+}
+
+private const val KM_TO_MILES = 0.621371
+
+private fun distanceLabel(km: Double, useMiles: Boolean): String =
+    if (useMiles) "${(km * KM_TO_MILES).roundToInt()} mi" else "${km.roundToInt()} km"
+
+@Composable
+private fun ZoomStepper(displayRangeKm: Double, useMiles: Boolean, onZoom: (Double) -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .zIndex(10f) // Explicit stacking order (Compose's equivalent of CSS z-index) —
+            // guaranteed to draw above the radar Canvas/aircraft regardless of declaration order.
+            .background(Color.Black.copy(alpha = 0.75f), RoundedCornerShape(50))
+            .border(1.dp, CLIMB_ORANGE, RoundedCornerShape(50)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // The whole left/right end of the pill (not just the tiny arrow glyph) is one tap
+        // target — a much more forgiving hit area than the glyph alone.
+        Box(
+            modifier = Modifier
+                .size(width = 24.dp, height = 26.dp)
+                .clickable { onZoom(-ZOOM_STEP_KM) },
+            contentAlignment = Alignment.Center
+        ) {
+            Text("‹", color = CLIMB_ORANGE, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        }
+        Text(
+            distanceLabel(displayRangeKm, useMiles),
+            color = CLIMB_ORANGE,
+            style = MaterialTheme.typography.caption2,
+            modifier = Modifier.padding(horizontal = 0.dp)
+        )
+        Box(
+            modifier = Modifier
+                .size(width = 24.dp, height = 26.dp)
+                .clickable { onZoom(ZOOM_STEP_KM) },
+            contentAlignment = Alignment.Center
+        ) {
+            Text("›", color = CLIMB_ORANGE, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        }
     }
 }
 
 @Composable
-private fun ZoomStepper(displayRangeKm: Double, onZoom: (Double) -> Unit, modifier: Modifier = Modifier) {
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text("‹", color = CLIMB_ORANGE, style = MaterialTheme.typography.button, modifier = Modifier.clickable { onZoom(-ZOOM_STEP_KM) })
-        Text("${displayRangeKm.roundToInt()} km", color = CLIMB_ORANGE, style = MaterialTheme.typography.caption1)
-        Text("›", color = CLIMB_ORANGE, style = MaterialTheme.typography.button, modifier = Modifier.clickable { onZoom(ZOOM_STEP_KM) })
+private fun DetailOverlay(
+    target: RadarTarget,
+    useMiles: Boolean,
+    isPinned: Boolean,
+    metadataLookup: MetadataLookup?,
+    onTogglePin: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val metadataLine = when (metadataLookup) {
+        null, MetadataLookup.Loading -> "Looking up registration…"
+        is MetadataLookup.Loaded -> metadataLookup.metadata?.let { meta ->
+            listOfNotNull(meta.model, meta.registration).joinToString(" | ").ifEmpty { "No data found" }
+        } ?: "No data found"
     }
-}
 
-@Composable
-private fun DetailOverlay(target: RadarTarget, onDismiss: () -> Unit) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.85f))
-            .clickable(onClick = onDismiss),
+        // Highest of the three overlay layers — must sit above the hamburger/filter menu
+        // (zIndex 20) and the zoom stepper (zIndex 10), since it's a modal dialog.
+        modifier = Modifier.fillMaxSize().zIndex(30f),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(target.aircraft.callsign, color = CALLSIGN_WHITE, style = MaterialTheme.typography.title3)
-            Text("${altitudeLabel(target)} ${climbArrow(target)}".trim(), color = INFO_BLUE, style = MaterialTheme.typography.body2)
-            Text(speedLabel(target), color = INFO_BLUE, style = MaterialTheme.typography.body2)
-            Text("Heading ${headingCompass(target.aircraft.trueTrackDeg)}", color = LABEL_GREEN, style = MaterialTheme.typography.body2)
-            Text("${target.distanceKm.roundToInt()} km away", color = LABEL_GREEN, style = MaterialTheme.typography.caption1)
-            Text("Registration/model: coming soon", color = GRID_GREEN, style = MaterialTheme.typography.caption2)
+        Column(
+            modifier = Modifier
+                .heightIn(max = 150.dp)
+                .background(Color.Black, RoundedCornerShape(14.dp))
+                .border(2.dp, BRIGHT_GREEN, RoundedCornerShape(14.dp))
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(1.dp)
+        ) {
+            Text(target.aircraft.callsign, color = CALLSIGN_WHITE, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.title3)
+            Text(
+                "${"${altitudeLabel(target)} ${climbArrow(target)}".trim()} | ${speedLabel(target)}",
+                color = INFO_BLUE,
+                style = MaterialTheme.typography.caption1
+            )
+            Text(
+                "${headingCompass(target.aircraft.trueTrackDeg)} | ${distanceLabel(target.distanceKm, useMiles)} away",
+                color = LABEL_GREEN,
+                style = MaterialTheme.typography.caption2
+            )
+            Text(metadataLine, color = GRID_GREEN, style = MaterialTheme.typography.caption2)
+
+            Row(
+                modifier = Modifier.padding(top = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                DetailButton(
+                    label = if (isPinned) "PINNED" else "PIN",
+                    textColor = if (isPinned) PIN_PURPLE else CALLSIGN_WHITE,
+                    onClick = onTogglePin
+                )
+                DetailButton(label = "CLOSE", textColor = CALLSIGN_WHITE, onClick = onDismiss)
+            }
         }
+    }
+}
+
+@Composable
+private fun DetailButton(label: String, textColor: Color, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .background(Color.DarkGray, RoundedCornerShape(50))
+            .border(1.dp, Color.Gray, RoundedCornerShape(50))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(label, color = textColor, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption2)
     }
 }
 
@@ -299,6 +423,7 @@ private fun RadarSweep(
     isAmbient: Boolean,
     activeFilters: Set<AircraftCategory>,
     myLocationMarker: RadarMarkerPosition?,
+    pinnedIcao24: String?,
     onZoom: (Double) -> Unit,
     onPan: (Double, Double) -> Unit,
     onTapTarget: (RadarTarget) -> Unit
@@ -356,12 +481,13 @@ private fun RadarSweep(
         }
     }
 
-    val measuredLabels = remember(visibleTargets) {
+    val measuredLabels = remember(visibleTargets, pinnedIcao24) {
         visibleTargets.associateWith { target ->
             val arrow = climbArrow(target)
+            val callsignColor = if (target.aircraft.icao24 == pinnedIcao24) PIN_PURPLE else CALLSIGN_WHITE
             textMeasurer.measure(
                 buildAnnotatedString {
-                    withStyle(SpanStyle(color = CALLSIGN_WHITE)) { append(target.aircraft.callsign) }
+                    withStyle(SpanStyle(color = callsignColor)) { append(target.aircraft.callsign) }
                     append("\n")
                     withStyle(SpanStyle(color = INFO_BLUE)) { append(altitudeLabel(target)) }
                     if (arrow.isNotEmpty()) {

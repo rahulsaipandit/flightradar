@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.deskradar.common.AircraftCategory
+import com.deskradar.common.AircraftMetadata
+import com.deskradar.common.AircraftMetadataProvider
 import com.deskradar.common.FusedLocationProvider
 import com.deskradar.common.GeoPoint
 import com.deskradar.common.OpenSkyApiClient
@@ -22,6 +24,13 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+/** Result of an in-flight or completed registration/model lookup for one aircraft. */
+sealed class MetadataLookup {
+    object Loading : MetadataLookup()
+    data class Loaded(val metadata: AircraftMetadata?) : MetadataLookup()
+}
 
 class RadarViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -40,6 +49,7 @@ class RadarViewModel(application: Application) : AndroidViewModel(application) {
     private val locationProvider = FusedLocationProvider(application)
     private val openSkyClient = OpenSkyApiClient()
     private val repository = RadarRepository(openSkyClient, MAX_DISPLAY_RANGE_KM)
+    private val metadataProvider = AircraftMetadataProvider()
 
     // Set from MainActivity's onStart/onStop — an AndroidViewModel isn't cleared just because
     // the Activity stops, so without this GPS would keep polling forever in the background.
@@ -134,7 +144,38 @@ class RadarViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private val _useMiles = MutableStateFlow(false)
+    val useMiles: StateFlow<Boolean> = _useMiles.asStateFlow()
+
+    fun toggleUnits() {
+        _useMiles.value = !_useMiles.value
+    }
+
+    // Only one pinned aircraft at a time; null = none pinned.
+    private val _pinnedIcao24 = MutableStateFlow<String?>(null)
+    val pinnedIcao24: StateFlow<String?> = _pinnedIcao24.asStateFlow()
+
+    fun togglePin(icao24: String) {
+        _pinnedIcao24.value = if (_pinnedIcao24.value == icao24) null else icao24
+    }
+
+    // icao24 -> lookup state. Populated lazily, only for aircraft the user has actually tapped
+    // (not the whole visible set) — adsbdb.com is a free third-party service with no documented
+    // rate limit we can rely on, so this deliberately isn't a bulk/prefetch call.
+    private val _metadataByIcao24 = MutableStateFlow<Map<String, MetadataLookup>>(emptyMap())
+    val metadataByIcao24: StateFlow<Map<String, MetadataLookup>> = _metadataByIcao24.asStateFlow()
+
+    fun requestMetadata(icao24: String) {
+        if (_metadataByIcao24.value.containsKey(icao24)) return // already loading or loaded
+        _metadataByIcao24.value = _metadataByIcao24.value + (icao24 to MetadataLookup.Loading)
+        viewModelScope.launch {
+            val result = metadataProvider.lookup(icao24)
+            _metadataByIcao24.value = _metadataByIcao24.value + (icao24 to MetadataLookup.Loaded(result))
+        }
+    }
+
     override fun onCleared() {
         openSkyClient.close()
+        metadataProvider.close()
     }
 }
