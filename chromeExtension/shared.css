@@ -1,0 +1,98 @@
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 16px;
+  color: #1a1a1a;
+  background: #fafafa;
+}
+
+h1 {
+  font-size: 16px;
+  margin: 0 0 12px;
+}
+
+fieldset {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin: 0 0 16px;
+  padding: 12px;
+}
+
+legend {
+  font-weight: 600;
+  padding: 0 4px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.radio-row {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+input[type='text'],
+input[type='password'],
+input[type='number'] {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 4px;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.credential-fields {
+  margin-top: 8px;
+  padding-left: 4px;
+}
+
+.credential-fields.disabled {
+  opacity: 0.5;
+}
+
+.hint {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.4;
+}
+
+button {
+  background: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1558b0;
+}
+
+.save-status {
+  margin-left: 8px;
+  font-size: 12px;
+  color: #188038;
+}
+
+.open-radar-btn {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.status-line {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 16px;
+}

@@ -1,4 +1,4 @@
-package com.deskradar.common
+package com.flightpulse.common
 
 enum class AircraftCategory { HELICOPTER, MILITARY, AIRLINER, PRIVATE }
 

@@ -1,4 +1,4 @@
-rootProject.name = "DeskRadar"
+rootProject.name = "FlightPulse"
 
 pluginManagement {
     repositories {

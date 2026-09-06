@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>FlightPulse</title>
+    <link rel="icon" href="icons/icon48.png" />
+    <link rel="stylesheet" href="radar.css" />
+  </head>
+  <body>
+    <div id="radar-container">
+      <canvas id="radar-canvas"></canvas>
+
+      <div id="state-message" class="state-message" hidden></div>
+
+      <button id="hamburger-btn" class="hamburger-btn" hidden>☰</button>
+      <div id="filter-menu" class="filter-menu" hidden></div>
+
+      <div id="zoom-stepper" class="zoom-stepper" hidden>
+        <div id="zoom-out" class="zoom-arrow">‹</div>
+        <span id="zoom-label" class="zoom-label"></span>
+        <div id="zoom-in" class="zoom-arrow">›</div>
+      </div>
+
+      <div id="center-reset" class="center-reset" hidden>⌖</div>
+
+      <div id="detail-overlay" class="detail-overlay" hidden></div>
+
+      <button id="settings-corner" class="settings-corner" title="OpenSky account settings">⚙</button>
+    </div>
+    <script type="module" src="radar.js"></script>
+  </body>
+</html>

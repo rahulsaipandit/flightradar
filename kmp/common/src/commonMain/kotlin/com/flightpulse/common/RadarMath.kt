@@ -1,4 +1,4 @@
-package com.deskradar.common
+package com.flightpulse.common
 
 import kotlin.math.PI
 import kotlin.math.atan2

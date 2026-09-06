@@ -1,4 +1,4 @@
-package com.deskradar.wear
+package com.flightpulse.wear
 
 import android.graphics.BitmapFactory
 import androidx.compose.animation.core.LinearEasing
@@ -71,10 +71,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
-import com.deskradar.common.AircraftCategory
-import com.deskradar.common.RadarMarkerPosition
-import com.deskradar.common.RadarTarget
-import com.deskradar.common.categories
+import com.flightpulse.common.AircraftCategory
+import com.flightpulse.common.RadarMarkerPosition
+import com.flightpulse.common.RadarTarget
+import com.flightpulse.common.categories
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.min
@@ -559,10 +559,10 @@ private fun RadarSweep(
                 val kmPerPixel = if (maxRadius > 0f) displayRangeKm / maxRadius else 0.0
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
-                    // android.util.Log.d("DeskRadarGesture", "down at ${down.position}")
+                    // android.util.Log.d("FlightPulseGesture", "down at ${down.position}")
                     val drag = awaitTouchSlopOrCancellation(down.id) { change, _ -> change.consume() }
                     if (drag == null) {
-                        // android.util.Log.d("DeskRadarGesture", "resolved as TAP (no slop crossed)")
+                        // android.util.Log.d("FlightPulseGesture", "resolved as TAP (no slop crossed)")
                         // Never crossed the slop threshold — a tap, if the finger actually lifted.
                         if (waitForUpOrCancellation() != null) {
                             currentHitAreas.entries
@@ -570,16 +570,16 @@ private fun RadarSweep(
                                 ?.let { (target, _) -> onTapTarget(target) }
                         }
                     } else {
-                        // android.util.Log.d("DeskRadarGesture", "resolved as DRAG (slop crossed), kmPerPixel=$kmPerPixel")
+                        // android.util.Log.d("FlightPulseGesture", "resolved as DRAG (slop crossed), kmPerPixel=$kmPerPixel")
                         // Slop exceeded — a genuine pan gesture.
                         drag(drag.id) { change ->
                             val eastKm = -change.positionChange().x * kmPerPixel
                             val northKm = change.positionChange().y * kmPerPixel
-                            // android.util.Log.d("DeskRadarGesture", "onPan(east=$eastKm, north=$northKm)")
+                            // android.util.Log.d("FlightPulseGesture", "onPan(east=$eastKm, north=$northKm)")
                             onPan(eastKm, northKm)
                             change.consume()
                         }
-                        // android.util.Log.d("DeskRadarGesture", "drag ended")
+                        // android.util.Log.d("FlightPulseGesture", "drag ended")
                     }
                 }
             }

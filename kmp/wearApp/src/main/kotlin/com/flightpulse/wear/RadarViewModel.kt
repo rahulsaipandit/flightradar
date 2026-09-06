@@ -1,20 +1,20 @@
-package com.deskradar.wear
+package com.flightpulse.wear
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.deskradar.common.AircraftCategory
-import com.deskradar.common.AircraftMetadata
-import com.deskradar.common.AircraftMetadataProvider
-import com.deskradar.common.FusedLocationProvider
-import com.deskradar.common.GeoPoint
-import com.deskradar.common.OpenSkyApiClient
-import com.deskradar.common.RadarMarkerPosition
-import com.deskradar.common.RadarRepository
-import com.deskradar.common.RadarTarget
-import com.deskradar.common.offsetGeoPoint
-import com.deskradar.common.projectOrNull
-import com.deskradar.common.projectPoint
+import com.flightpulse.common.AircraftCategory
+import com.flightpulse.common.AircraftMetadata
+import com.flightpulse.common.AircraftMetadataProvider
+import com.flightpulse.common.FusedLocationProvider
+import com.flightpulse.common.GeoPoint
+import com.flightpulse.common.OpenSkyApiClient
+import com.flightpulse.common.RadarMarkerPosition
+import com.flightpulse.common.RadarRepository
+import com.flightpulse.common.RadarTarget
+import com.flightpulse.common.offsetGeoPoint
+import com.flightpulse.common.projectOrNull
+import com.flightpulse.common.projectPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -123,9 +123,9 @@ class RadarViewModel(application: Application) : AndroidViewModel(application) {
     /** Shifts the manual center by a km offset (east/north) — starts from GPS on the first pan. */
     fun panBy(eastwardKm: Double, northwardKm: Double) {
         val base = panOverride.value ?: location.value ?: return
-        // android.util.Log.d("DeskRadarPan", "panBy($eastwardKm, $northwardKm) base=$base")
+        // android.util.Log.d("FlightPulsePan", "panBy($eastwardKm, $northwardKm) base=$base")
         panOverride.value = offsetGeoPoint(base, eastwardKm, northwardKm)
-        // android.util.Log.d("DeskRadarPan", "panOverride now = ${panOverride.value}")
+        // android.util.Log.d("FlightPulsePan", "panOverride now = ${panOverride.value}")
     }
 
     /** Resets both pan and zoom back to defaults — the center-of-radar reset icon does both at once. */

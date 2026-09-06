@@ -106,7 +106,7 @@ void setup() {
   if (isConfigured && storedSsid.length() > 0) {
     WiFi.persistent(false); 
     WiFi.mode(WIFI_STA); 
-    WiFi.setHostname("DeskRadar");
+    WiFi.setHostname("FlightPulse");
 
     for (int attempt = 1; attempt <= 3; attempt++) {
       if (attempt == 1) {

@@ -12,8 +12,8 @@
   #define GRID_CENTER_X         120
   #define GRID_CENTER_Y         120
   #define BACKLIGHT_PIN         21
-  #define SOFTAP_SSID           "DeskRadar-Setup-byGeGeLV"
-  #define PORTAL_TITLE          "DeskRadar Setup by GeGeLv"
+  #define SOFTAP_SSID           "FlightPulse-Setup-byGeGeLV"
+  #define PORTAL_TITLE          "FlightPulse Setup by GeGeLv"
   #define FORCE_INSECURE_TLS    0
 
 #elif defined(BOARD_MONKEY_PORTRAIT)
@@ -23,8 +23,8 @@
   #define GRID_CENTER_X          160
   #define GRID_CENTER_Y          240
   #define BACKLIGHT_PIN          27
-  #define SOFTAP_SSID            "DeskRadar-Setup"
-  #define PORTAL_TITLE           "DeskRadar Setup"
+  #define SOFTAP_SSID            "FlightPulse-Setup"
+  #define PORTAL_TITLE           "FlightPulse Setup"
   #define FORCE_INSECURE_TLS     1
 
 #else

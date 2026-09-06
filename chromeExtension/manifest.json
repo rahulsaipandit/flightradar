@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "FlightPulse",
+  "version": "0.1.0",
+  "description": "Nearby aircraft radar powered by the OpenSky Network, anonymous tier by default.",
+  "permissions": ["storage", "sidePanel"],
+  "host_permissions": [
+    "https://opensky-network.org/*",
+    "https://auth.opensky-network.org/*",
+    "https://api.adsbdb.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "options_page": "options.html",
+  "action": {
+    "default_title": "FlightPulse",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

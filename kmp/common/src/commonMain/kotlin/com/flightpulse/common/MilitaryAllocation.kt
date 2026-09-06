@@ -1,4 +1,4 @@
-package com.deskradar.common
+package com.flightpulse.common
 
 /**
  * ICAO24 hex-address ranges reserved for military use. This is intentionally a small,

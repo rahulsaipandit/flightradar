@@ -1,0 +1,237 @@
+/* Every color/dimension here is pulled directly from kmp/wearApp's RadarScreen.kt so this
+   matches the watch app's look exactly, not just "similarly". Compose dp is mapped 1:1 to CSS
+   px — this is a full-width desktop layout (not a fixed circular watch-face mockup), but the
+   individual controls keep their watch-native compact sizing rather than being blown up. */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #000000;
+  overflow: hidden;
+  font-family: Roboto, 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Author styles (e.g. this file's `display: flex` rules below) always beat the browser's
+   built-in `[hidden] { display: none }` rule, regardless of selector specificity — without this,
+   every element toggled via `el.hidden = true/false` in radar.js would ignore it and stay
+   visible. */
+[hidden] {
+  display: none !important;
+}
+
+#radar-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: #000000;
+}
+
+#radar-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.state-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #00ff00;
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.5;
+  white-space: pre-line;
+  cursor: pointer;
+}
+
+/* Hamburger / category button — 28dp circle, 1dp orange border, top-center, padding-top 30dp. */
+.hamburger-btn {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid #ffa000;
+  background: transparent;
+  color: #ffa000;
+  font-size: 13px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 20;
+  padding: 0;
+}
+
+/* Category/units filter menu — black @ 85% alpha, orange text, top-center below the hamburger. */
+.filter-menu {
+  position: absolute;
+  top: 62px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 20;
+}
+
+.filter-menu .filter-row {
+  color: #ffa000;
+  font-size: 12px;
+  padding: 2px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Zoom stepper — pill, black @ 75% alpha, 1dp orange border, bottom-center. Vertical position is
+   set inline by positionChromeOverlays() in radar.js (anchored to the radar circle's own edge,
+   not a fixed screen offset — see the comment there), not by a `bottom` value here. */
+.zoom-stepper {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid #ffa000;
+  border-radius: 50px;
+  z-index: 10;
+}
+
+.zoom-arrow {
+  width: 24px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffa000;
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.zoom-label {
+  color: #ffa000;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Center-reset reticle — exact center, orange when panned/zoomed away from default, gray otherwise. */
+.center-reset {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #808080;
+  font-size: 26px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.center-reset.away-from-default {
+  color: #ffa000;
+}
+
+/* Tap-to-detail modal — black bg, bright-green 2dp border, 14dp rounded corners, above everything. */
+.detail-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+}
+
+.detail-overlay .detail-box {
+  max-height: 150px;
+  overflow-y: auto;
+  background: #000000;
+  border: 2px solid #00ff00;
+  border-radius: 14px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 160px;
+}
+
+.detail-callsign {
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.detail-callsign.pinned {
+  color: #ce93d8;
+}
+
+.detail-line-blue {
+  color: #4fc3f7;
+  font-size: 13px;
+}
+
+.detail-line-green {
+  color: #00e000;
+  font-size: 11px;
+}
+
+.detail-line-metadata {
+  color: #00a000;
+  font-size: 11px;
+}
+
+.detail-buttons {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.detail-button {
+  background: #444444;
+  border: 1px solid #808080;
+  border-radius: 50px;
+  padding: 6px 12px;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+.detail-button.pinned {
+  color: #ce93d8;
+}
+
+/* Not part of the watch UI — the extension-only OpenSky credentials entry point. Kept small
+   and out of the way (top-left) so it doesn't compete with the replicated watch chrome. */
+.settings-corner {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid #444444;
+  background: transparent;
+  color: #666666;
+  font-size: 13px;
+  cursor: pointer;
+  z-index: 20;
+}
+
+.settings-corner:hover {
+  color: #999999;
+  border-color: #666666;
+}

@@ -60,7 +60,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.deskradar.common"
+    namespace = "com.flightpulse.common"
     compileSdk = 34
     defaultConfig {
         minSdk = 26

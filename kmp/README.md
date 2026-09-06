@@ -1,6 +1,6 @@
-# DeskRadar (KMP)
+# FlightPulse (KMP)
 
-Kotlin Multiplatform port of the ESP32 DeskRadar firmware (`../firmware/ESP32Radar/`), modeled on [PeopleInSpace](https://github.com/joreilly/PeopleInSpace)'s module layout: one shared logic module, a native Compose UI per Android form factor, and native SwiftUI for Apple platforms.
+Kotlin Multiplatform port of the ESP32 FlightPulse firmware (`../firmware/ESP32Radar/`), modeled on [PeopleInSpace](https://github.com/joreilly/PeopleInSpace)'s module layout: one shared logic module, a native Compose UI per Android form factor, and native SwiftUI for Apple platforms.
 
 ## Modules
 

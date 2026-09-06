@@ -1,4 +1,4 @@
-package com.deskradar.common
+package com.flightpulse.common
 
 import kotlinx.coroutines.flow.Flow
 

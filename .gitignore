@@ -13,3 +13,6 @@ DerivedData/
 # OS
 .DS_Store
 Thumbs.db
+
+# Chrome extension packaging output
+/flightpulse-extension.zip

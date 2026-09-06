@@ -1,4 +1,4 @@
-package com.deskradar.common
+package com.flightpulse.common
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -43,6 +43,6 @@ class FusedLocationProvider(private val context: Context) : LocationProvider {
     }
 
     companion object {
-        private const val TAG = "DeskRadarLocation"
+        private const val TAG = "FlightPulseLocation"
     }
 }

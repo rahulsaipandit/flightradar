@@ -7,10 +7,10 @@ plugins {
 }
 
 android {
-    namespace = "com.deskradar.app"
+    namespace = "com.flightpulse.app"
     compileSdk = 34
     defaultConfig {
-        applicationId = "com.deskradar.app"
+        applicationId = "com.flightpulse.app"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

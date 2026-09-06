@@ -1,4 +1,4 @@
-package com.deskradar.wear
+package com.flightpulse.wear
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -20,9 +20,9 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.wear.ambient.AmbientModeSupport
 import androidx.wear.compose.material.MaterialTheme
-import com.deskradar.common.AircraftCategory
-import com.deskradar.common.RadarMarkerPosition
-import com.deskradar.common.RadarTarget
+import com.flightpulse.common.AircraftCategory
+import com.flightpulse.common.RadarMarkerPosition
+import com.flightpulse.common.RadarTarget
 
 sealed class RadarUiState {
     object PermissionRequired : RadarUiState()
@@ -153,6 +153,6 @@ class MainActivity : FragmentActivity(), AmbientModeSupport.AmbientCallbackProvi
     }
 
     companion object {
-        private const val TAG = "DeskRadarMainActivity"
+        private const val TAG = "FlightPulseMainActivity"
     }
 }

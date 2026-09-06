@@ -1,0 +1,9 @@
+{
+  "name": "flightpulse-chrome-extension",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Packaging tooling for the FlightPulse Chrome extension.",
+  "scripts": {
+    "package": "node scripts/package-extension.js"
+  }
+}

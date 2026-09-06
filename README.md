@@ -1,4 +1,4 @@
-# deskradar
+# FlightPulse
 Flightradar display
 
 Register at: https://opensky-network.org/

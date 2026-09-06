@@ -1,10 +1,10 @@
-# DeskRadar Project Structure
+# FlightPulse Project Structure
 
 This document describes how the repo is organized after splitting the ESP32 firmware from the new Kotlin Multiplatform (KMP) port.
 
 ## Overview
 
-DeskRadar started as a single ESP32 sketch that polls the OpenSky Network API and renders nearby aircraft on a small TFT radar display. The repo now holds two independent implementations of that idea:
+FlightPulse started as a single ESP32 sketch that polls the OpenSky Network API and renders nearby aircraft on a small TFT radar display. The repo now holds two independent implementations of that idea:
 
 1. **`firmware/`** — the original ESP32/Arduino firmware, consolidated into one configurable sketch.
 2. **`kmp/`, `iosApp/`, `watchosApp/`** — a from-scratch Kotlin Multiplatform port of the same functionality, targeting Desktop, Android, iOS, Wear OS, and watchOS. Its module layout mirrors [PeopleInSpace](https://github.com/joreilly/PeopleInSpace), a proven open-source KMP app with the same shape (poll an API, plot positions, run across phone/desktop/watch).
@@ -217,4 +217,19 @@ Getting the live radar working on real hardware required a few dev-convenience s
 
 ## Current status
 
-This is a structural scaffold, not a working app: `firmware/ESP32Radar/` has real, consolidated logic, but most KMP modules and both native Apple app folders still contain only Gradle wiring / placeholder READMEs, no ported feature code yet. The one exception is `kmp/wearApp`, which has a minimal "Hello DeskRadar" Compose screen (`MainActivity.kt`) — a connectivity smoke test, not the real radar UI, kept in place until there's real data from `common` to render. This has been built and installed on a real Galaxy Watch (SM-R935U) via the command-line flow above, confirming the Gradle wrapper, toolchain config, and adb pairing all actually work end-to-end. The on-device voice assistant above is design notes only — nothing has been benchmarked or built. See each module's README for what's next.
+This is a structural scaffold, not a working app: `firmware/ESP32Radar/` has real, consolidated logic, but most KMP modules and both native Apple app folders still contain only Gradle wiring / placeholder READMEs, no ported feature code yet. The one exception is `kmp/wearApp`, which has a minimal "Hello FlightPulse" Compose screen (`MainActivity.kt`) — a connectivity smoke test, not the real radar UI, kept in place until there's real data from `common` to render. This has been built and installed on a real Galaxy Watch (SM-R935U) via the command-line flow above, confirming the Gradle wrapper, toolchain config, and adb pairing all actually work end-to-end. The on-device voice assistant above is design notes only — nothing has been benchmarked or built. See each module's README for what's next.
+
+### Run command
+# One-time per shell session: put adb on PATH
+$env:Path += ";$env:ANDROID_HOME\platform-tools"
+
+# Confirm the watch is connected over adb
+adb devices -l
+
+# Build + install the debug build
+cd D:\Github\flightradar\kmp
+.\gradlew.bat :wearApp:installDebug --console=plain
+
+# Force-stop any running instance and relaunch fresh
+adb shell am force-stop com.flightpulse.wear
+adb shell am start -n com.flightpulse.wear/com.flightpulse.wear.MainActivity

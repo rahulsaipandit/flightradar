@@ -1,4 +1,4 @@
-package com.deskradar.common
+package com.flightpulse.common
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement

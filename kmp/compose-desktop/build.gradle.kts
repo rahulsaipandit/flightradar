@@ -17,6 +17,6 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "com.deskradar.desktop.MainKt"
+        mainClass = "com.flightpulse.desktop.MainKt"
     }
 }
