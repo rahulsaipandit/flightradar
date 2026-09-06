@@ -2,6 +2,7 @@ package com.deskradar.common
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -32,8 +33,16 @@ class FusedLocationProvider(private val context: Context) : LocationProvider {
                 result.lastLocation?.let { trySend(GeoPoint(it.latitude, it.longitude)) }
             }
         }
+        Log.d(TAG, "requestLocationUpdates (GPS ON)")
         client.requestLocationUpdates(request, callback, context.mainLooper)
 
-        awaitClose { client.removeLocationUpdates(callback) }
+        awaitClose {
+            Log.d(TAG, "removeLocationUpdates (GPS OFF)")
+            client.removeLocationUpdates(callback)
+        }
+    }
+
+    companion object {
+        private const val TAG = "DeskRadarLocation"
     }
 }

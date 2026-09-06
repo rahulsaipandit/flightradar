@@ -21,6 +21,9 @@ data class RadarTarget(
     val bearingRad: Double
 )
 
+/** Distance/bearing from a radar center to some other point — e.g. a "my GPS location" marker. */
+data class RadarMarkerPosition(val distanceKm: Double, val bearingRad: Double)
+
 /** km per degree of latitude (and, scaled by cos(lat), of longitude) — same approximation the firmware uses. */
 private const val KM_PER_DEGREE = 111.1
 
@@ -40,17 +43,25 @@ fun boundingBox(center: GeoPoint, rangeKm: Double): BoundingBox {
  * Ports the distance/bearing math from fetchAndMapFlights(): an equirectangular approximation
  * (accurate enough at radar-display ranges), not great-circle distance.
  */
-fun projectOrNull(center: GeoPoint, aircraft: Aircraft, maxRangeKm: Double): RadarTarget? {
-    val dY = (aircraft.latitude - center.latitude) * KM_PER_DEGREE
-    val dX = (aircraft.longitude - center.longitude) * KM_PER_DEGREE * cos(center.latitude * PI / 180.0)
+private fun distanceAndBearing(center: GeoPoint, point: GeoPoint): RadarMarkerPosition {
+    val dY = (point.latitude - center.latitude) * KM_PER_DEGREE
+    val dX = (point.longitude - center.longitude) * KM_PER_DEGREE * cos(center.latitude * PI / 180.0)
     val distanceKm = sqrt(dX * dX + dY * dY)
-    if (distanceKm > maxRangeKm) return null
 
     var bearingRad = atan2(dX, dY)
     if (bearingRad < 0) bearingRad += 2 * PI
 
+    return RadarMarkerPosition(distanceKm, bearingRad)
+}
+
+fun projectOrNull(center: GeoPoint, aircraft: Aircraft, maxRangeKm: Double): RadarTarget? {
+    val (distanceKm, bearingRad) = distanceAndBearing(center, GeoPoint(aircraft.latitude, aircraft.longitude))
+    if (distanceKm > maxRangeKm) return null
     return RadarTarget(aircraft, distanceKm, bearingRad)
 }
+
+/** Distance/bearing from [center] to some other point, e.g. the device's actual GPS location. */
+fun projectPoint(center: GeoPoint, point: GeoPoint): RadarMarkerPosition = distanceAndBearing(center, point)
 
 /** Inverse of the projection above — moves [center] by a km offset (east/north), for pan. */
 fun offsetGeoPoint(center: GeoPoint, eastwardKm: Double, northwardKm: Double): GeoPoint {

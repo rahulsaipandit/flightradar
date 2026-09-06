@@ -18,10 +18,21 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    buildTypes {
+        debug {
+            // Dev convenience: screen would otherwise time out mid-testing (looks like a crash).
+            // Real battery cost — never do this in a release build. See docs/design.md.
+            buildConfigField("boolean", "KEEP_SCREEN_ON", "true")
+        }
+        release {
+            buildConfigField("boolean", "KEEP_SCREEN_ON", "false")
+        }
     }
 }
 
@@ -35,4 +46,5 @@ dependencies {
     implementation("androidx.wear.compose:compose-foundation:1.4.0")
     implementation("androidx.activity:activity-compose:1.9.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
+    implementation("androidx.wear:wear:1.4.0")
 }

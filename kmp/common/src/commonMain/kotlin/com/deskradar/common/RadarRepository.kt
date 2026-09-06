@@ -7,11 +7,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
 
-data class RadarSnapshot(
-    val nearest: RadarTarget?,
-    val count: Int,
-    val targets: List<RadarTarget>
-)
+/**
+ * Raw aircraft from the last poll, filtered to within [RadarRepository]'s fetch radius of
+ * whatever center was active *at fetch time* — deliberately NOT pre-projected into
+ * screen-relative distance/bearing. Projection has to happen reactively against the *current*
+ * center instead (see RadarViewModel), otherwise panning would only visibly move aircraft at
+ * the next ~108s poll instead of instantly, the way zoom already works.
+ */
+data class RadarSnapshot(val aircraft: List<Aircraft>)
 
 /** Guest-mode OpenSky poll intervals, matching fetchAndMapFlights()'s pollInterval backoff. */
 private const val POLL_INTERVAL_GUEST_MS = 108_000L
@@ -43,8 +46,10 @@ class RadarRepository(
             when (val result = client.fetchStates(box)) {
                 is OpenSkyResult.Success -> {
                     pollIntervalMs = POLL_INTERVAL_GUEST_MS
-                    val targets = result.aircraft.mapNotNull { projectOrNull(currentCenter, it, rangeKm) }
-                    emit(RadarSnapshot(targets.minByOrNull { it.distanceKm }, targets.size, targets))
+                    // Filtered by distance from the fetch-time center, but only the Aircraft
+                    // itself is kept — distance/bearing get recomputed against the live center.
+                    val aircraft = result.aircraft.mapNotNull { projectOrNull(currentCenter, it, rangeKm)?.aircraft }
+                    emit(RadarSnapshot(aircraft))
                 }
                 OpenSkyResult.RateLimited -> pollIntervalMs = POLL_INTERVAL_RATE_LIMITED_MS
                 is OpenSkyResult.Failure -> pollIntervalMs = POLL_INTERVAL_ERROR_MS
